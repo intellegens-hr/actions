@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: "Path to .NET project directory"
     required: false
-    default: "./"
+    default: "."
 
   sln-file:
     description: "Path to solution file for code analysis (relative to working-directory)"

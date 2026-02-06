@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: "Path to .NET project directory"
     required: false
-    default: "./"
+    default: "."
 
   dotnet-version:
     description: "Version of .NET to use (e.g., 8.0.x)"

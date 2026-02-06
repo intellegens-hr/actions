@@ -24,10 +24,10 @@ Publishes SARIF results from .NET code analysis to GitHub Actions as annotations
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/dotnet-sarif-to-md@main
-	with:
-		report-path: ./build/
-		report-name: results.sarif
-		report-title: my-sarif-report
+  with:
+    report-path: ./build/
+    report-name: results.sarif
+    report-title: my-sarif-report
 ```
 
 ---
@@ -48,10 +48,10 @@ Parses a dotnet-format SARIF/JSON report, generates a markdown summary, and can 
 
 ```yaml
 - uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@main
-	with:
-		report-path: ./build/results.sarif
-		fail-on-warning: true
-		fail-on-error: true
+  with:
+    report-path: ./build/results.sarif
+    fail-on-warning: true
+    fail-on-error: true
 ```
 
 ---
@@ -72,10 +72,10 @@ Installs dependencies, builds, sets up environment for .NET projects, and runs c
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/dotnet-ci@main
-	with:
-		working-directory: ./src/
-		dotnet-version: 8.0.x
-		sln-file: MySolution.sln
+  with:
+    working-directory: ./src/
+    dotnet-version: 8.0.x
+    sln-file: MySolution.sln
 ```
 
 ---
@@ -95,9 +95,9 @@ Sets up Inspector Code tools and runs code analysis for .NET projects.
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/dotnet-lint-jb@main
-	with:
-		working-directory: ./src/
-		sln-file: MySolution.sln
+  with:
+    working-directory: ./src/
+    sln-file: MySolution.sln
 ```
 
 ---
@@ -117,9 +117,9 @@ Installs dependencies, builds, and sets up environment for .NET projects.
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/dotnet-build@main
-	with:
-		working-directory: ./src/
-		dotnet-version: 8.0.x
+  with:
+    working-directory: ./src/
+    dotnet-version: 8.0.x
 ```
 
 ---
@@ -141,11 +141,11 @@ Installs dependencies, builds, sets up environment for TypeScript projects, and 
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/ts-ci@main
-	with:
-		working-directory: ./frontend/
-		version: 10
-		eslint-fail-on-error: true
-		prettier-fail-on-error: false
+  with:
+    working-directory: ./frontend/
+    version: 10
+    eslint-fail-on-error: true
+    prettier-fail-on-error: false
 ```
 
 ---
@@ -165,9 +165,9 @@ Installs dependencies, builds, and sets up environment for TypeScript projects.
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/ts-build@main
-	with:
-		working-directory: ./frontend/
-		version: 10
+  with:
+    working-directory: ./frontend/
+    version: 10
 ```
 
 ---
@@ -188,10 +188,10 @@ Runs ESLint and outputs results in JSON format for TypeScript projects.
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/ts-eslint@main
-	with:
-		working-directory: ./frontend/
-		report-name: eslint_report.json
-		fail-on-error: true
+  with:
+    working-directory: ./frontend/
+    report-name: eslint_report.json
+    fail-on-error: true
 ```
 
 ---
@@ -211,9 +211,9 @@ Runs Prettier and outputs results to GitHub Action summary for TypeScript projec
 
 ```yaml
 - uses: intellegens-hr/actions/.github/actions/ts-prettier@main
-	with:
-		working-directory: ./frontend/
-		fail-on-error: true
+  with:
+    working-directory: ./frontend/
+    fail-on-error: true
 ```
 
 ---

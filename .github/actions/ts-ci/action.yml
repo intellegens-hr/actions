@@ -5,7 +5,7 @@ inputs:
   working-directory:
     description: "Path to TypeScript project directory"
     required: false
-    default: "./"
+    default: "."
 
   version:
     description: "Version of PNPM to use (e.g., 10)"
