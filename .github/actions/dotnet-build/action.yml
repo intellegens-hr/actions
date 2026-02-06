@@ -1,0 +1,34 @@
+name: ":NET Prepare Environment and Build"
+description: "Install deps, build, env setup for .NET projects"
+
+inputs:
+  working-directory:
+    description: "Path to .NET project directory"
+    required: false
+    default: "./"
+
+  dotnet-version:
+    description: "Version of .NET to use (e.g., 8.0.x)"
+    required: false
+    default: "8.0.x"
+
+runs:
+  using: "composite"
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Restore dependencies
+      working-directory: ${{ inputs.working-directory }}
+      run: dotnet restore
+      shell: bash
+
+    - name: Build
+      working-directory: ${{ inputs.working-directory }}
+      run: dotnet build --no-restore
+      shell: bash

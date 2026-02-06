@@ -1,0 +1,18 @@
+name: ":Publish SARIF results to GitHub"
+description: "Publish SARIF results from .NET code analysis to GitHub actions as annotations and summary markdown"
+
+runs:
+  using: "composite"
+  runs-on: ubuntu-latest
+  steps:
+    - name: Publish InspectCode Report Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: report-sarif
+        path: ./dotnet/dotnet_report.sarif
+
+    - name: Generate Markdown Report
+      if: always()
+      uses: ./bin/actions/dotnet-sarif-md
+      with:
+        report-path: ./dotnet/dotnet_report.sarif

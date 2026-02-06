@@ -1,0 +1,33 @@
+name: ":NET Build and Lint"
+description: "Install deps, build, env setup for .NET projects and run code analysis with JetBrains ReSharper Command Line Tools"
+
+inputs:
+  working-directory:
+    description: "Path to .NET project directory"
+    required: false
+    default: "./"
+
+  dotnet-version:
+    description: "Version of .NET to use (e.g., 8.0.x)"
+    required: false
+    default: "8.0.x"
+
+  sln-file:
+    description: "Path to solution file for code analysis (relative to working-directory)"
+    required: true
+
+runs:
+  using: "composite"
+  runs-on: ubuntu-latest
+  steps:
+    - name: Build and Setup Environment
+      uses: ./.github/actions/dotnet-build
+      with:
+        working-directory: ${{ inputs.working-directory }}
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Run Code Analysis
+      uses: ./.github/actions/dotnet-lint-jb
+      with:
+        working-directory: ${{ inputs.working-directory }}
+        sln-file: ${{ inputs.sln-file }}

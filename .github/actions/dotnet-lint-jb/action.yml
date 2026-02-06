@@ -1,0 +1,27 @@
+name: ":Setup Inspector Code tools and run code analysis"
+description: "Setup Inspector Code tools and run code analysis for .NET projects with JetBrains ReSharper Command Line Tools"
+
+inputs:
+  working-directory:
+    description: "Path to .NET project directory"
+    required: false
+    default: "./"
+
+  sln-file:
+    description: "Path to solution file for code analysis (relative to working-directory)"
+    required: true
+
+runs:
+  using: "composite"
+  runs-on: ubuntu-latest
+  steps:
+    - name: Setup InspectCode tool
+      run: |
+        dotnet new tool-manifest --force
+        dotnet tool install JetBrains.ReSharper.GlobalTools --version 2025.2.3
+        dotnet tool restore
+
+    - name: Run InspectCode
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        dotnet jb inspectcode ${{ inputs.sln-file }} --output=dotnet_report.sarif --format=sarif || true

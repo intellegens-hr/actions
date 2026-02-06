@@ -1,0 +1,24 @@
+# GitHub Action: Dotnet summary from Report JSON
+# Parses a dotnet-format SARIF/JSON report and publishes a markdown summary to the workflow summary.
+# Optionally fails the workflow if warnings or errors are detected.
+
+name: 'Dotnet Format Report Summary'
+description: 'Parses a dotnet-format SARIF/JSON report, generates a markdown summary, and optionally fails the workflow on warnings/errors.'
+
+inputs:
+  report-path:
+    description: 'Path or glob pattern to locate the dotnet-format SARIF/JSON report file (e.g. report.sarif)'
+    required: true
+    default: 'report.sarif'
+  fail-on-warning:
+    description: "If set to 'true', the workflow will fail when dotnet-format warnings are detected."
+    default: 'false'
+    required: false
+  fail-on-error:
+    description: "If set to 'true', the workflow will fail when dotnet-format errors are detected. If set to 'false', the summary will still show errors but the workflow will not fail."
+    default: 'true'
+    required: false
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
