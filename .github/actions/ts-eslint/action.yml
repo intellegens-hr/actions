@@ -1,0 +1,44 @@
+name: "Run Eslint for TypeScript projects"
+description: "Run Eslint and output results in JSON format for TypeScript projects"
+
+inputs:
+  working-directory:
+    description: "Path to TypeScript project directory"
+    required: false
+    default: "./"
+
+  report-name:
+    description: "Full report name without extension (e.g., 'eslint_report.json')"
+    required: false
+    default: "eslint_report.json"
+
+  fail-on-error:
+    description: "Whether to fail the action if ESLint finds errors (true/false)"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Eslint
+      working-directory: ${{ inputs.working-directory }}
+      run: npm exec eslint "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json
+      shell: bash
+
+    - name: Annotate Code Linting Results
+      if: always()
+      uses: ataylorme/eslint-annotate-action@v3
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        report-json: "${{ inputs.working-directory }}${{ inputs.report-name }}"
+        only-pr-files: true
+        fail-on-error: ${{ inputs.fail-on-error }}
+
+    - name: Create Full ESLint Report
+      if: always()
+      uses: ataylorme/eslint-annotate-action@v3
+      with:
+        report-json: "${{ inputs.working-directory }}${{ inputs.report-name }}"
+        only-pr-files: false
+        markdown-report-on-step-summary: true
+        fail-on-error: ${{ inputs.fail-on-error }}

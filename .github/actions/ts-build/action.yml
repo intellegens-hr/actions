@@ -1,0 +1,33 @@
+name: "TypeScript Prepare Environment and Build"
+description: "Install deps, build, env setup for TypeScript projects"
+
+inputs:
+  working-directory:
+    description: "Path to TypeScript project directory"
+    required: false
+    default: "./"
+
+  version:
+    description: "Version of PNPM to use (e.g., 10)"
+    required: false
+    default: "10"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.version }}
+
+    - name: Install dependencies
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm install
+      shell: bash
+
+    - name: Build
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm run build
+      shell: bash

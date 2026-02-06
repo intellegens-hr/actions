@@ -1,5 +1,5 @@
-name: "TypeScript Prepare Environment and Build"
-description: "Install deps, build, env setup for TypeScript projects"
+name: "TypeScript Build and Lint"
+description: "Install deps, build, env setup for TypeScript projects and run code analysis with Eslint and Prettier"
 
 inputs:
   working-directory:
@@ -12,23 +12,33 @@ inputs:
     required: false
     default: "10"
 
+  eslint-fail-on-error:
+    description: "Whether to fail the action if ESLint finds errors (true/false)"
+    required: false
+    default: "false"
+
+  prettier-fail-on-error:
+    description: "Whether to fail the action if Prettier finds formatting issues (true/false)"
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
-  runs-on: ubuntu-latest
   steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup PNPM
-      uses: pnpm/action-setup@v4
+    - name: Build and Setup Environment
+      uses: ./.github/actions/ts-build
       with:
+        working-directory: ${{ inputs.working-directory }}
         version: ${{ inputs.version }}
 
-    - name: Install dependencies
-      working-directory: ${{ inputs.working-directory }}
-      run: pnpm install
-      shell: bash
+    - name: Run Code Analysis
+      uses: ./.github/actions/ts-eslint
+      with:
+        working-directory: ${{ inputs.working-directory }}
+        fail-on-error: ${{ inputs.eslint-fail-on-error }}
 
-    - name: Build
-      working-directory: ${{ inputs.working-directory }}
-      run: pnpm run build
-      shell: bash
+    - name: Run Prettier
+      uses: ./.github/actions/ts-prettier
+      with:
+        working-directory: ${{ inputs.working-directory }}
+        fail-on-error: ${{ inputs.prettier-fail-on-error }}
