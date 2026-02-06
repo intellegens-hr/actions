@@ -28,6 +28,6 @@ runs:
 
     - name: Generate Markdown Report
       if: always()
-      uses: ./bin/actions/dotnet-sarif-md
+      uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@master
       with:
         report-path: ${{ inputs.report-path }}${{ inputs.report-name }}

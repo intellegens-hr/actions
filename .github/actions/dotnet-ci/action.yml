@@ -20,13 +20,13 @@ runs:
   using: "composite"
   steps:
     - name: Build and Setup Environment
-      uses: ./.github/actions/dotnet-build
+      uses: intellegens-hr/actions/.github/actions/dotnet-build@master
       with:
         working-directory: ${{ inputs.working-directory }}
         dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Run Code Analysis
-      uses: ./.github/actions/dotnet-lint-jb
+      uses: intellegens-hr/actions/.github/actions/dotnet-lint-jb@master
       with:
         working-directory: ${{ inputs.working-directory }}
         sln-file: ${{ inputs.sln-file }}

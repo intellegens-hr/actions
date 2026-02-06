@@ -26,19 +26,19 @@ runs:
   using: "composite"
   steps:
     - name: Build and Setup Environment
-      uses: ./.github/actions/ts-build
+      uses: intellegens-hr/actions/.github/actions/ts-build@master
       with:
         working-directory: ${{ inputs.working-directory }}
         version: ${{ inputs.version }}
 
     - name: Run Code Analysis
-      uses: ./.github/actions/ts-eslint
+      uses: intellegens-hr/actions/.github/actions/ts-eslint@master
       with:
         working-directory: ${{ inputs.working-directory }}
         fail-on-error: ${{ inputs.eslint-fail-on-error }}
 
     - name: Run Prettier
-      uses: ./.github/actions/ts-prettier
+      uses: intellegens-hr/actions/.github/actions/ts-prettier@master
       with:
         working-directory: ${{ inputs.working-directory }}
         fail-on-error: ${{ inputs.prettier-fail-on-error }}
