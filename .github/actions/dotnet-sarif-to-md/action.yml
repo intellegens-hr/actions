@@ -8,7 +8,7 @@ inputs:
     default: "./"
 
   report-name:
-    description: "Full report name without extension (e.g., 'dotnet_report.sarif')"
+    description: "Full report name with extension (e.g., 'dotnet_report.sarif')"
     required: true
     default: "dotnet_report.sarif"
 
@@ -21,6 +21,7 @@ runs:
   using: "composite"
   steps:
     - name: Publish InspectCode Report Artifact
+      shell: bash
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.report-name }}
@@ -28,6 +29,7 @@ runs:
 
     - name: Generate Markdown Report
       if: always()
+      shell: bash
       uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@master
       with:
         report-path: ${{ inputs.report-path }}${{ inputs.report-name }}

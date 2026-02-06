@@ -8,7 +8,7 @@ inputs:
     default: "./"
 
   report-name:
-    description: "Full report name without extension (e.g., 'eslint_report.json')"
+    description: "Full report name with extension (e.g., 'eslint_report.json')"
     required: false
     default: "eslint_report.json"
 
@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Run Eslint
       working-directory: ${{ inputs.working-directory }}
-      run: npm exec eslint "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json
+      run: npm exec eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json
       shell: bash
 
     - name: Annotate Code Linting Results

@@ -15,6 +15,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup InspectCode tool
+      shell: bash
       run: |
         dotnet new tool-manifest --force
         dotnet tool install JetBrains.ReSharper.GlobalTools --version 2025.2.3
@@ -22,5 +23,6 @@ runs:
 
     - name: Run InspectCode
       working-directory: ${{ inputs.working-directory }}
+      shell: bash
       run: |
         dotnet jb inspectcode ${{ inputs.sln-file }} --output=dotnet_report.sarif --format=sarif || true
