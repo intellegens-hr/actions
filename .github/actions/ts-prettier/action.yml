@@ -18,6 +18,8 @@ runs:
     - name: Run Prettier & Output To Summary
       working-directory: ${{ inputs.working-directory }}
       shell: bash
+      env:
+        FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
       run: |
         echo "## Prettier Check" >> $GITHUB_STEP_SUMMARY
 
@@ -33,7 +35,7 @@ runs:
         else
           echo "❌ Prettier found formatting issues." >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ inputs.fail-on-error }}" == "true" ]; then
+          if [ "$FAIL_ON_ERROR" == "true" ]; then
             exit 1
           fi
         fi
