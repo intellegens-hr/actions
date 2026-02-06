@@ -23,8 +23,8 @@ runs:
       run: |
         echo "## Prettier Check" >> $GITHUB_STEP_SUMMARY
 
-        OUTPUT=$(npm exec prettier --check . 2>&1)
-        STATUS=$?
+        STATUS=0
+        OUTPUT=$(npm exec prettier --check . 2>&1) || STATUS=$?
 
         echo '```' >> $GITHUB_STEP_SUMMARY
         echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
