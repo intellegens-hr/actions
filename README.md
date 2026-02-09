@@ -135,7 +135,6 @@ Installs dependencies, builds, sets up environment for TypeScript projects, and 
 - `working-directory` (optional, default: `./`)
 - `version` (optional, default: `10`)
 - `eslint-fail-on-error` (optional, default: `false`)
-- `prettier-fail-on-error` (optional, default: `false`)
 
 **Usage:**
 
@@ -145,7 +144,6 @@ Installs dependencies, builds, sets up environment for TypeScript projects, and 
     working-directory: ./frontend/
     version: 10
     eslint-fail-on-error: true
-    prettier-fail-on-error: false
 ```
 
 ---
@@ -213,7 +211,6 @@ Runs Prettier and outputs results to GitHub Action summary for TypeScript projec
 - uses: intellegens-hr/actions/.github/actions/ts-prettier@main
   with:
     working-directory: ./frontend/
-    fail-on-error: true
 ```
 
 ---

@@ -17,11 +17,6 @@ inputs:
     required: false
     default: "false"
 
-  prettier-fail-on-error:
-    description: "Whether to fail the action if Prettier finds formatting issues (true/false)"
-    required: false
-    default: "false"
-
 runs:
   using: "composite"
   steps:
@@ -41,4 +36,3 @@ runs:
       uses: intellegens-hr/actions/.github/actions/ts-prettier@master
       with:
         working-directory: ${{ inputs.working-directory }}
-        fail-on-error: ${{ inputs.prettier-fail-on-error }}

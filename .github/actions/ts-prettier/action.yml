@@ -1,5 +1,5 @@
 name: "Run Prettier for TypeScript projects"
-description: "Run Prettier and output results to GitHub action summary for TypeScript projects"
+description: "Run Prettier for TypeScript projects"
 
 inputs:
   working-directory:
@@ -7,35 +7,10 @@ inputs:
     required: false
     default: "."
 
-  fail-on-error:
-    description: "Whether to fail the action if Prettier finds formatting issues (true/false)"
-    required: false
-    default: "false"
-
 runs:
   using: "composite"
   steps:
-    - name: Run Prettier & Output To Summary
+    - name: Run Prettier
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-      env:
-        FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
-      run: |
-        echo "## Prettier Check" >> $GITHUB_STEP_SUMMARY
-
-        STATUS=0
-        OUTPUT=$(npm exec prettier --check . 2>&1) || STATUS=$?
-
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-
-        if [ $STATUS -eq 0 ]; then
-          echo "✅ All files are properly formatted." >> $GITHUB_STEP_SUMMARY
-        else
-          echo "❌ Prettier found formatting issues." >> $GITHUB_STEP_SUMMARY
-
-          if [ "$FAIL_ON_ERROR" == "true" ]; then
-            exit 1
-          fi
-        fi
+      run: npm exec prettier --check .
