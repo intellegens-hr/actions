@@ -13,4 +13,5 @@ runs:
     - name: Run Prettier
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-      run: npm exec prettier --check .
+      run: |
+        npm exec prettier --check . || (echo "❌ Prettier found a style or syntax error! Please check the output above and fix your code." && exit 1)
