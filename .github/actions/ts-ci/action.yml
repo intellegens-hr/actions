@@ -17,6 +17,11 @@ inputs:
     required: false
     default: "false"
 
+  eslint-check-name:
+    description: "Name of the check to display in GitHub (e.g., 'ESLint Check')"
+    required: false
+    default: "ESLint Check"
+
 runs:
   using: "composite"
   steps:
@@ -31,6 +36,7 @@ runs:
       with:
         working-directory: ${{ inputs.working-directory }}
         fail-on-error: ${{ inputs.eslint-fail-on-error }}
+        check-name: ${{ inputs.eslint-check-name }}
 
     - name: Run Prettier
       uses: intellegens-hr/actions/.github/actions/ts-prettier@master
