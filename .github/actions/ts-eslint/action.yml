@@ -44,3 +44,4 @@ runs:
         only-pr-files: true
         fail-on-error: ${{ inputs.fail-on-error == 'true' }}
         check-name: ${{ inputs.check-name }}
+        reporter: github-check
