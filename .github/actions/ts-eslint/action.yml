@@ -28,25 +28,12 @@ runs:
     - name: Run Eslint
       working-directory: ${{ inputs.working-directory }}
       run: |
-        echo "PWD: $(pwd)"
-        echo "REPORT PATH: ${{ inputs.working-directory }}/${{ inputs.report-name }}"
         if [ "${{ inputs.fail-on-error }}" = "true" ]; then
-          npm exec eslint -- **/*.{ts,tsx} --output-file "${{ inputs.report-name }}" --format json
+          npx eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx
         else
-          npm exec eslint -- **/*.{ts,tsx} --output-file "${{ inputs.report-name }}" --format json || true
+          npx eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx || true
         fi
       shell: bash
-
-    - name: List files after ESLint
-      run: ls -l ${{ inputs.working-directory }}
-      shell: bash
-
-    - name: Create Full ESLint Report
-      if: always()
-      uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
-      with:
-        report-format: eslint-json
-        report-path: ${{ inputs.working-directory }}/${{ inputs.report-name }}
 
     - name: Annotate Code Linting Results
       if: always()
@@ -58,3 +45,10 @@ runs:
         fail-on-error: ${{ inputs.fail-on-error == 'true' }}
         check-name: ${{ inputs.check-name }}
         reporter: github-check
+
+    - name: Create Full ESLint Report
+      if: always()
+      uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
+      with:
+        report-format: eslint-json
+        report-path: ${{ inputs.working-directory }}/${{ inputs.report-name }}
