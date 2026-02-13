@@ -29,9 +29,9 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         if [ "${{ inputs.fail-on-error }}" = "true" ]; then
-          npx eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx
+          npx eslint . --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx
         else
-          npx eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx || true
+          npx eslint . --output-file "${{ inputs.report-name }}" --format json --ext .ts --ext .tsx || true
         fi
       shell: bash
 
