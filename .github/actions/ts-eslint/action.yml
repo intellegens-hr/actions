@@ -35,6 +35,12 @@ runs:
         fi
       shell: bash
 
+    - name: Find ESLint report
+      run: |
+        ls -lh ${{ inputs.working-directory }}
+        cat ${{ inputs.working-directory }}/${{ inputs.report-name }} || echo "Report nije pronađen"
+      shell: bash
+
     - name: Create Full ESLint Report
       if: always()
       uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
