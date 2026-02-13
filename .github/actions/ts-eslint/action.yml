@@ -35,10 +35,8 @@ runs:
         fi
       shell: bash
 
-    - name: Find ESLint report
-      run: |
-        ls -lh ${{ inputs.working-directory }}
-        cat ${{ inputs.working-directory }}/${{ inputs.report-name }} || echo "Report nije pronađen"
+    - name: List files after ESLint
+      run: ls -l ${{ inputs.working-directory }}
       shell: bash
 
     - name: Create Full ESLint Report
