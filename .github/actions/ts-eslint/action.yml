@@ -28,6 +28,7 @@ runs:
     - name: Run Eslint
       working-directory: ${{ inputs.working-directory }}
       run: |
+        echo "PWD: $(pwd)"
         if [ "${{ inputs.fail-on-error }}" = "true" ]; then
           npm exec eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json
         else
