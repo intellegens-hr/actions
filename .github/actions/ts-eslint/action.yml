@@ -29,6 +29,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         echo "PWD: $(pwd)"
+        echo "REPORT PATH: ${{ inputs.working-directory }}/${{ inputs.report-name }}"
         if [ "${{ inputs.fail-on-error }}" = "true" ]; then
           npm exec eslint -- "**/*.{ts,tsx}" --output-file "${{ inputs.report-name }}" --format json
         else
