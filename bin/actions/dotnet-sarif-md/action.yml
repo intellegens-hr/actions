@@ -6,6 +6,10 @@ name: 'Dotnet Format Report Summary'
 description: 'Parses a dotnet-format SARIF/JSON report, generates a markdown summary, and optionally fails the workflow on warnings/errors.'
 
 inputs:
+  report-format:
+    description: 'The format of the report file. Supported formats: "dotnet-sarif" or "eslint-json".'
+    required: true
+    default: 'dotnet-sarif'
   report-path:
     description: 'Path or glob pattern to locate the dotnet-format SARIF/JSON report file (e.g. report.sarif)'
     required: true

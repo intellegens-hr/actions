@@ -28087,86 +28087,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8808:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports["default"] = getAnalyzedReport;
-const dotnet_format_1 = __nccwpck_require__(6858);
-/**
- * Analyzes a dotnet format report JS object and returns a report
- * @param files a JavaScript representation of a dotnet format JSON report
- */
-function getAnalyzedReport(files, failOnWarning, failOnError) {
-    // Create markdown placeholder
-    let markdownText = '';
-    // Start the error and warning counts at 0
-    let errorCount = 0;
-    let warningCount = 0;
-    // Create text string placeholders
-    let errorText = '';
-    let warningText = '';
-    // Loop through each file
-    for (const file of files.runs) {
-        const { results } = file;
-        for (const result of results) {
-            const { level, message, locations } = result;
-            const { physicalLocation } = locations[0];
-            const filePath = physicalLocation.artifactLocation.uri;
-            const startLine = physicalLocation.region.startLine;
-            const endLine = physicalLocation.region.endLine || physicalLocation.region.startLine;
-            let isWarning = true;
-            // Increment error or warning count based on level
-            if (level === dotnet_format_1.Level.Error) {
-                errorCount++;
-                isWarning = false;
-            }
-            else if (level === dotnet_format_1.Level.Warning) {
-                warningCount++;
-            }
-            else {
-                continue; // Skip if not error or warning
-            }
-            let messageText = `### \`${filePath}\` line \`${startLine.toString()}\`\n`;
-            messageText += `- Start Line:  ${startLine.toString()}\n`;
-            messageText += `- End Line: ${endLine.toString()}\n`;
-            messageText += `- Message: \`${message.text}\`\n`;
-            // Add the markdown text to the appropriate placeholder
-            if (isWarning) {
-                warningText += messageText;
-            }
-            else {
-                errorText += messageText;
-            }
-        }
-    }
-    // If there is any markdown error text, add it to the markdown output
-    if (errorText.length) {
-        markdownText += `## ❌ ${errorCount.toString()} Error(s):\n`;
-        markdownText += errorText + '\n';
-    }
-    // If there is any markdown warning text, add it to the markdown output
-    if (warningText.length) {
-        markdownText += `## ⚠️ ${warningCount.toString()} Warning(s):\n`;
-        markdownText += warningText + '\n';
-    }
-    let success = errorCount === 0;
-    if ((errorCount > 0 && failOnError) || (warningCount > 0 && failOnWarning)) {
-        success = false;
-    }
-    return {
-        errorCount,
-        warningCount,
-        markdown: markdownText,
-        success,
-    };
-}
-
-
-/***/ }),
-
 /***/ 6866:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -28211,14 +28131,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(6966));
 const jsonReportToJs_1 = __importDefault(__nccwpck_require__(5482));
-const getAnalyzedReport_1 = __importDefault(__nccwpck_require__(8808));
+const reportAnalyzer_1 = __importDefault(__nccwpck_require__(1228));
 async function run() {
     try {
         const reportPath = core.getInput('report-path', { required: true });
+        const reportFormat = core.getInput('report-format', { required: true });
         const failOnWarning = core.getInput('fail-on-warning') === 'true';
         const failOnError = core.getInput('fail-on-error') === 'true';
-        const reportJS = await (0, jsonReportToJs_1.default)(reportPath);
-        const analyzedReport = (0, getAnalyzedReport_1.default)(reportJS, failOnWarning, failOnError);
+        const reportJS = await (0, jsonReportToJs_1.default)(reportPath, reportFormat);
+        const analyzedReport = reportAnalyzer_1.default.getAnalyzedReport(reportJS, reportFormat, failOnWarning, failOnError);
         core.summary.addRaw(analyzedReport?.markdown || '');
         await core.summary.write();
         if (analyzedReport?.success == false) {
@@ -28298,7 +28219,7 @@ function parseReportFile(reportFile) {
  * Converts a dotnet format report JSON file to an array of JavaScript objects
  * @param reportFile path to a dotnet format JSON file
  */
-async function jsonReportToJs(reportFile) {
+async function jsonReportToJs(reportFile, reportFormat) {
     const globber = await glob.create(reportFile);
     const files = await globber.glob();
     if (files.length === 0)
@@ -28308,6 +28229,13 @@ async function jsonReportToJs(reportFile) {
     if (reports.length === 1)
         return reports[0];
     // Merge all runs into one DotnetFormatTypes object
+    if (reportFormat === 'dotnet-sarif') {
+        return mergeDotnetFormatReports(reports);
+    }
+    // For ESLint reports, we can just concatenate the arrays
+    return reports.flat();
+}
+function mergeDotnetFormatReports(reports) {
     const base = reports[0];
     const mergedRuns = reports.flatMap(r => r.runs);
     return {
@@ -28315,6 +28243,161 @@ async function jsonReportToJs(reportFile) {
         runs: mergedRuns,
     };
 }
+
+
+/***/ }),
+
+/***/ 1228:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const dotnet_format_1 = __nccwpck_require__(6858);
+class ReportAnalyzer {
+    /**
+     * Analyzes a dotnet format report JS object and returns a report
+     * @param files a JavaScript representation of a dotnet format JSON report
+     * @param reportFormat the format of the report (e.g. "dotnet-sarif" or "eslint-json")
+     * @param failOnWarning whether to fail the report on warnings
+     * @param failOnError whether to fail the report on errors
+     * @returns an analyzed report with error/warning counts, markdown, and success status
+     */
+    static getAnalyzedReport(files, reportFormat, failOnWarning, failOnError) {
+        if (reportFormat === 'dotnet-sarif')
+            return this.getAnalyzedDotnetReport(files, failOnWarning, failOnError);
+        return this.getAnalyzedESLintReport(files, failOnWarning, failOnError);
+    }
+    static getAnalyzedDotnetReport(files, failOnWarning, failOnError) {
+        // Create markdown placeholder
+        let markdownText = '';
+        // Start the error and warning counts at 0
+        let errorCount = 0;
+        let warningCount = 0;
+        // Create text string placeholders
+        let errorText = '';
+        let warningText = '';
+        // Loop through each file
+        for (const file of files.runs) {
+            const { results } = file;
+            for (const result of results) {
+                const { level, message, locations } = result;
+                const { physicalLocation } = locations[0];
+                const filePath = physicalLocation.artifactLocation.uri;
+                const startLine = physicalLocation.region.startLine;
+                const endLine = physicalLocation.region.endLine || physicalLocation.region.startLine;
+                let isWarning = true;
+                // Increment error or warning count based on level
+                if (level === dotnet_format_1.Level.Error) {
+                    errorCount++;
+                    isWarning = false;
+                }
+                else if (level === dotnet_format_1.Level.Warning) {
+                    warningCount++;
+                }
+                else {
+                    continue; // Skip if not error or warning
+                }
+                let messageText = `### \`${filePath}\` line \`${startLine.toString()}\`\n`;
+                messageText += `- Start Line:  ${startLine.toString()}\n`;
+                messageText += `- End Line: ${endLine.toString()}\n`;
+                messageText += `- Message: \`${message.text}\`\n`;
+                // Add the markdown text to the appropriate placeholder
+                if (isWarning) {
+                    warningText += messageText;
+                }
+                else {
+                    errorText += messageText;
+                }
+            }
+        }
+        // If there is any markdown error text, add it to the markdown output
+        if (errorText.length) {
+            markdownText += `## ❌ ${errorCount.toString()} Error(s):\n`;
+            markdownText += errorText + '\n';
+        }
+        // If there is any markdown warning text, add it to the markdown output
+        if (warningText.length) {
+            markdownText += `## ⚠️ ${warningCount.toString()} Warning(s):\n`;
+            markdownText += warningText + '\n';
+        }
+        let success = errorCount === 0;
+        if ((errorCount > 0 && failOnError) || (warningCount > 0 && failOnWarning)) {
+            success = false;
+        }
+        return {
+            errorCount,
+            warningCount,
+            markdown: markdownText,
+            success,
+        };
+    }
+    static getAnalyzedESLintReport(files, failOnWarning, failOnError) {
+        // Create markdown placeholder
+        let markdownText = '';
+        // Start the error and warning counts at 0
+        let errorCount = 0;
+        let warningCount = 0;
+        // Create text string placeholders
+        let errorText = '';
+        let warningText = '';
+        // Loop through each file
+        for (const file of files) {
+            // Get the file path and any warning/error messages
+            const { filePath, messages } = file;
+            // Skip files with no error or warning messages
+            if (!messages.length)
+                continue;
+            errorCount += file.errorCount;
+            warningCount += file.warningCount;
+            // Loop through all the error/warning messages for the file
+            for (const lintMessage of messages) {
+                const { severity, ruleId, message } = lintMessage;
+                // Check if it a warning or error
+                const isWarning = severity < 2;
+                // Set start line to 1 if not provided, as ESLint messages can sometimes be missing line numbers
+                let { line } = lintMessage;
+                if (!line) {
+                    line = 1;
+                }
+                const endLine = lintMessage.endLine ? lintMessage.endLine : line;
+                let messageText = `### \`${filePath}\` line \`${line.toString()}\`\n`;
+                messageText += '- Start Line: `' + line.toString() + '`\n';
+                messageText += '- End Line: `' + endLine.toString() + '`\n';
+                messageText += '- Message: ' + message + '\n';
+                messageText += '  - From: [`' + ruleId + '`]\n';
+                // Add the markdown text to the appropriate placeholder
+                if (isWarning) {
+                    warningText += messageText;
+                }
+                else {
+                    errorText += messageText;
+                }
+            }
+        }
+        // If there is any markdown error text, add it to the markdown output
+        if (errorText.length) {
+            markdownText += `## ❌ ${errorCount.toString()} Error(s):\n`;
+            markdownText += errorText + '\n';
+        }
+        // If there is any markdown warning text, add it to the markdown output
+        if (warningText.length) {
+            markdownText += `## ⚠️ ${warningCount.toString()} Warning(s):\n`;
+            markdownText += warningText + '\n';
+        }
+        let success = errorCount === 0;
+        if ((errorCount > 0 && failOnError) || (warningCount > 0 && failOnWarning)) {
+            success = false;
+        }
+        return {
+            errorCount,
+            warningCount,
+            markdown: markdownText,
+            success,
+        };
+    }
+}
+exports["default"] = ReportAnalyzer;
 
 
 /***/ }),
