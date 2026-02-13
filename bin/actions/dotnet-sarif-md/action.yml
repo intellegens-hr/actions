@@ -20,7 +20,7 @@ inputs:
     required: false
   fail-on-error:
     description: "If set to 'true', the workflow will fail when dotnet-format errors are detected. If set to 'false', the summary will still show errors but the workflow will not fail."
-    default: "false"
+    default: "true"
     required: false
 
 runs:
