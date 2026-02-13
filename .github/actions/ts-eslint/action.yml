@@ -35,6 +35,13 @@ runs:
         fi
       shell: bash
 
+    - name: Create Full ESLint Report
+      if: always()
+      uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
+      with:
+        report-format: eslint-json
+        report-path: ${{ inputs.working-directory }}/${{ inputs.report-name }}
+
     - name: Annotate Code Linting Results
       if: always()
       uses: reviewdog/action-eslint@v1
@@ -45,10 +52,3 @@ runs:
         fail-on-error: ${{ inputs.fail-on-error == 'true' }}
         check-name: ${{ inputs.check-name }}
         reporter: github-check
-
-    - name: Create Full ESLint Report
-      if: always()
-      uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
-      with:
-        report-format: eslint-json
-        report-path: ${{ inputs.working-directory }}${{ inputs.report-name }}
