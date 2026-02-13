@@ -51,4 +51,4 @@ runs:
       uses: intellegens-hr/actions/bin/actions/dotnet-sarif-md@testing-branch
       with:
         report-format: eslint-json
-        report-path: ${{ inputs.working-directory }}/${{ inputs.report-name }}
+        report-path: ${{ inputs.working-directory }}${{ inputs.report-name }}
