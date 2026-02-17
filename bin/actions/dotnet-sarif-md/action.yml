@@ -6,8 +6,11 @@ name: 'Dotnet Format Report Summary'
 description: 'Parses a dotnet-format SARIF/JSON report, generates a markdown summary, and optionally fails the workflow on warnings/errors.'
 
 inputs:
+  github-token:
+    description: 'GitHub token (reserved for parity with ESLint action; not required for dotnet report processing)'
+    required: false
   report-path:
-    description: 'Path or glob pattern to locate the dotnet-format SARIF/JSON report file (e.g. report.sarif)'
+    description: 'Path or glob pattern to locate the dotnet-format SARIF report file (e.g. report.sarif)'
     required: true
     default: 'report.sarif'
   fail-on-warning:

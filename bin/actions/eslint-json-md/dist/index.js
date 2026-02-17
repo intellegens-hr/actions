@@ -57223,7 +57223,7 @@ __exportStar(__nccwpck_require__(4308), exports);
 
 /***/ }),
 
-/***/ 5705:
+/***/ 117:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -57267,16 +57267,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(6966));
 const JsonReportToJs_1 = __nccwpck_require__(5883);
-const types_1 = __nccwpck_require__(5923);
-const ReportAnalyzer_1 = __importDefault(__nccwpck_require__(8366));
 const GetPullRequestFiles_1 = __nccwpck_require__(1494);
+const types_1 = __nccwpck_require__(5923);
 const AddAnnotationsToFileChanges_1 = __nccwpck_require__(7140);
+const ReportAnalyzer_1 = __importDefault(__nccwpck_require__(5906));
 async function run() {
     try {
         const reportPath = core.getInput('report-path', { required: true });
         const failOnWarning = core.getInput('fail-on-warning') === 'true';
         const failOnError = core.getInput('fail-on-error') === 'true';
-        const reportJS = (await new JsonReportToJs_1.JsonReportToJs(types_1.ReportFormats.Sarif).convert(reportPath));
+        const reportJS = (await new JsonReportToJs_1.JsonReportToJs(types_1.ReportFormats.EslintJson).convert(reportPath));
         const filesInPR = await (0, GetPullRequestFiles_1.getPrFiles)();
         const analyzedReport = ReportAnalyzer_1.default.getAnalyzedReport(reportJS, filesInPR, failOnWarning, failOnError);
         if (analyzedReport && analyzedReport.annotations.length > 0)
@@ -57298,13 +57298,12 @@ run();
 
 /***/ }),
 
-/***/ 8366:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ 5906:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const types_1 = __nccwpck_require__(5923);
 class ReportAnalyzer {
     /**
      * Analyzes a dotnet format report JS object and returns a report
@@ -57324,30 +57323,31 @@ class ReportAnalyzer {
         let warningText = '';
         let annotations = [];
         // Loop through each file
-        for (const file of files.runs) {
-            const { results } = file;
-            for (const result of results) {
-                const { level, message, locations } = result;
-                const { physicalLocation } = locations[0];
-                const filePath = physicalLocation.artifactLocation.uri;
-                const startLine = physicalLocation.region.startLine;
-                const endLine = physicalLocation.region.endLine || physicalLocation.region.startLine;
-                let isWarning = true;
-                // Increment error or warning count based on level
-                if (level === types_1.Level.Error) {
-                    errorCount++;
-                    isWarning = false;
+        for (const file of files) {
+            // Get the file path and any warning/error messages
+            const { filePath, messages } = file;
+            const normalizedPath = this.normalizeToRepoPath(filePath);
+            // Skip files with no error or warning messages
+            if (!messages.length)
+                continue;
+            errorCount += file.errorCount;
+            warningCount += file.warningCount;
+            // Loop through all the error/warning messages for the file
+            for (const lintMessage of messages) {
+                const { severity, ruleId, message } = lintMessage;
+                // Check if it a warning or error
+                const isWarning = severity < 2;
+                // Set start line to 1 if not provided, as ESLint messages can sometimes be missing line numbers
+                let { line } = lintMessage;
+                if (!line) {
+                    line = 1;
                 }
-                else if (level === types_1.Level.Warning) {
-                    warningCount++;
-                }
-                else {
-                    continue; // Skip if not error or warning
-                }
-                let messageText = `### \`${filePath}\` line \`${startLine.toString()}\`\n`;
-                messageText += `- Start Line:  ${startLine.toString()}\n`;
-                messageText += `- End Line: ${endLine.toString()}\n`;
-                messageText += `- Message: \`${message.text}\`\n`;
+                const endLine = lintMessage.endLine ? lintMessage.endLine : line;
+                let messageText = `### \`${normalizedPath}\` line \`${line.toString()}\`\n`;
+                messageText += '- Start Line: `' + line.toString() + '`\n';
+                messageText += '- End Line: `' + endLine.toString() + '`\n';
+                messageText += '- Message: ' + message + '\n';
+                messageText += '  - From: [`' + ruleId + '`]\n';
                 // Add the markdown text to the appropriate placeholder
                 if (isWarning) {
                     warningText += messageText;
@@ -57356,12 +57356,12 @@ class ReportAnalyzer {
                     errorText += messageText;
                 }
                 // Create annotation only if the file is in the PR, otherwise just count the errors/warnings without annotating
-                if (filesInPR.includes(filePath)) {
+                if (filesInPR.includes(normalizedPath)) {
                     annotations.push({
-                        file: filePath,
-                        line: startLine,
+                        file: normalizedPath,
+                        line: line,
                         endLine: endLine,
-                        message: message.text,
+                        message: message,
                         level: isWarning ? 'warning' : 'error',
                     });
                 }
@@ -57377,7 +57377,7 @@ class ReportAnalyzer {
             markdownText += `## ⚠️ ${warningCount.toString()} Warning(s):\n`;
             markdownText += warningText + '\n';
         }
-        let success = errorCount === 0;
+        let success = true;
         if ((errorCount > 0 && failOnError) || (warningCount > 0 && failOnWarning)) {
             success = false;
         }
@@ -57386,8 +57386,14 @@ class ReportAnalyzer {
             warningCount,
             markdown: markdownText,
             success,
-            annotations: [],
+            annotations,
         };
+    }
+    static normalizeToRepoPath(filePath) {
+        const workspace = process.env.GITHUB_WORKSPACE;
+        if (!workspace)
+            return filePath;
+        return filePath.replace(workspace + '/', '');
     }
 }
 exports["default"] = ReportAnalyzer;
@@ -63624,7 +63630,7 @@ legacyRestEndpointMethods.VERSION = VERSION;
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(5705);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(117);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

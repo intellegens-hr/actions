@@ -1,0 +1,27 @@
+# GitHub Action: ESLint summary and annotations from Report JSON
+# Parses an ESLint JSON report and publishes a markdown summary and annotations to the workflow summary.
+# Optionally fails the workflow if warnings or errors are detected.
+
+name: "ESLint Report Summary and Annotations"
+description: "Parses an ESLint JSON report, generates a markdown summary and annotations, and optionally fails the workflow on warnings/errors."
+
+inputs:
+  github-token:
+    description: "GitHub token used to read pull request changed files"
+    required: true
+  report-path:
+    description: "Path or glob pattern to locate the ESLint JSON report file (e.g. report.json)"
+    required: true
+    default: "report.json"
+  fail-on-warning:
+    description: "If set to 'true', the workflow will fail when ESLint warnings are detected."
+    default: "false"
+    required: false
+  fail-on-error:
+    description: "If set to 'true', the workflow will fail when ESLint errors are detected. If set to 'false', the summary will still show errors but the workflow will not fail."
+    default: "true"
+    required: false
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
